@@ -1,0 +1,771 @@
+---
+title: "Capstone"
+author: "Patrick Slade Mahoney"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#install.packages("foreign")
+#install.packages("plm")
+#install.packages(c("readxl", "haven"), dependencies=TRUE)
+#install.packages("ggstatsplot")
+#install.packages( "arm")
+#install.packages("apaTables")
+library(apaTables)
+library(arm)
+library(here)
+library(ggplot2)
+library(tidyverse)
+library(stargazer)
+
+library(ggstatsplot)
+library(haven)
+library(readxl)
+library(plm)
+library(foreign)
+
+
+```
+
+```{r car}
+
+
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+# Data Load
+# Make sure to pipe to get to the data 
+data_1 <- read_sav(here("raw-data/EHPM SPSS 2015","EHPM 2015.sav")) 
+EHPM_15 <- data_1[, c("r005","ingfa", "ingpe", "area")] 
+EHPM_15 <- data_1[, c("r005","ingfa", "ingpe", "area")] |>   mutate(year=2015,
+         mun_id=EHPM_15$r005,
+         month_hh_income= EHPM_15$ingfa,
+         income_pcap= EHPM_15$ingpe, 
+         area = EHPM_15$area) |> 
+  group_by(mun_id) |> 
+  summarize(year=mean(year),
+            month_hh_income=mean(month_hh_income),
+            income_pcap=mean(income_pcap))
+
+# 2009 does not have a unique ID
+#data_0 <- read_sav(here("raw-data/EHPM SPSS 2009","EHPM2009.sav"))
+#colnames(data_0)
+#EHPM_09 <- data_0[, c("idmunic","INGFA", "INGPE")] |> 
+ # mutate(year=2009,
+  #       mun_id=EHPM_09$idmunic,
+   #      month_hh_income= EHPM_09$INGFA,
+    #     income_pcap= EHPM_09$INGPE)
+
+data_2 <- read_sav(here("raw-data/EHPM SPSS 2011","EHPM2011.sav")) 
+EHPM_11 <- data_2[, c("idmunic","INGFA", "INGPE")] 
+EHPM_11 <- data_2[, c("idmunic","INGFA", "INGPE")] |> 
+  mutate(year=2011,
+         mun_id=EHPM_11$idmunic,
+         month_hh_income= EHPM_11$INGFA,
+         income_pcap= EHPM_11$INGPE) |> 
+  group_by(mun_id) |> 
+  summarize(year=mean(year),
+            month_hh_income=mean(month_hh_income),
+            income_pcap=mean(income_pcap))
+
+data_3 <- read_sav(here("raw-data/EHPM SPSS 2010","EHPM2010.sav"))
+EHPM_10 <- data_3[, c("idmunic","INGFA", "INGPE")] 
+EHPM_10 <- data_3[, c("idmunic","INGFA", "INGPE")]  |>  mutate(year=2010,
+         mun_id=EHPM_10$idmunic,
+         month_hh_income= EHPM_10$INGFA,
+         income_pcap= EHPM_10$INGPE) |> 
+  group_by(mun_id) |> 
+  summarize(year=mean(year),
+            month_hh_income=mean(month_hh_income),
+            income_pcap=mean(income_pcap))
+
+
+data_4 <- read_sav(here("raw-data/EHPM SPSS 2012","EHPM2012.sav")) 
+EHPM_12 <- data_4[, c("codmun","INGFA", "INGPE")]  
+EHPM_12 <- data_4[, c("codmun","INGFA", "INGPE")] |>   
+  mutate(year=2012,
+         mun_id=EHPM_12$codmun,
+         month_hh_income= EHPM_12$INGFA,
+         income_pcap= EHPM_12$INGPE) |> 
+  group_by(mun_id) |> 
+  summarize(year=mean(year),
+            month_hh_income=mean(month_hh_income),
+            income_pcap=mean(income_pcap))
+
+data_5 <- read_sav(here("raw-data/EHPM SPSS 2013","EHPM_2013.sav")) 
+EHPM_13 <- data_5[, c("cod_munic","INGFA", "INGPER")] 
+EHPM_13 <- data_5[, c("cod_munic","INGFA", "INGPER")] |> 
+  mutate(year=2013,
+         mun_id=EHPM_13$cod_munic,
+         month_hh_income= EHPM_13$INGFA,
+         income_pcap= EHPM_13$INGPER) |> 
+  group_by(mun_id) |> 
+  summarize(year=mean(year),
+            month_hh_income=mean(month_hh_income),
+            income_pcap=mean(income_pcap))
+
+data_6 <- read_sav(here("raw-data/EHPM SPSS 2014","EHPM_2014.sav")) 
+EHPM_14 <- data_6[, c("codmun","INGFA", "INGPER")] 
+EHPM_14 <- data_6[, c("codmun","INGFA", "INGPER")] |> 
+  mutate(year=2014,
+         mun_id=EHPM_14$codmun,
+         month_hh_income= EHPM_14$INGFA,
+         income_pcap= EHPM_14$INGPER) |> 
+  group_by(mun_id) |> 
+  summarize(year=mean(year),
+            month_hh_income=mean(month_hh_income),
+            income_pcap=mean(income_pcap))
+
+data_7 <- read_sav(here("raw-data/EHPM SPSS 2016","EHPM 2016 RESUMEN.sav")) 
+EHPM_16 <- data_7[, c("codigomunic","ingfa", "ingpe")] 
+EHPM_16 <- data_7[, c("codigomunic","ingfa", "ingpe")] |> 
+  mutate(year=2016,
+         mun_id=EHPM_16$codigomunic,
+         month_hh_income= EHPM_16$ingfa,
+         income_pcap= EHPM_16$ingpe) |> 
+  group_by(mun_id) |> 
+  summarize(year=mean(year),
+            month_hh_income=mean(month_hh_income),
+            income_pcap=mean(income_pcap))
+
+data_8 <- read_sav(here("raw-data/EHPM SPSS 2017","sec00.sav")) 
+EHPM_17 <- data_8[, c("codigomunic","ingfa", "ingpe")]  
+EHPM_17 <- data_8[, c("codigomunic","ingfa", "ingpe")] |> 
+  mutate(year=2017,
+         mun_id=EHPM_17$codigomunic,
+         month_hh_income= EHPM_17$ingfa,
+         income_pcap= EHPM_17$ingpe) |> 
+    group_by(mun_id) |> 
+  summarize(year=mean(year),
+            month_hh_income=mean(month_hh_income),
+            income_pcap=mean(income_pcap))
+  
+# Merge all the municiaplity economic data together
+my_data <- rbind(EHPM_10,EHPM_11, EHPM_12, EHPM_13, EHPM_14, EHPM_15, EHPM_16, EHPM_17)
+  
+
+
+
+  
+
+```
+
+
+
+# Next we need to load in the repatriation and crime/assault data
+
+```{r cars}
+### Load in Repatriations ###
+repatriados <- read_csv(here("raw-data/ES_Deportations", "repatriados.csv"))
+
+#### 2010 
+crime_2010 <- read_xlsx(here("raw-data", "10_homicides.xlsx")) |> 
+    janitor::clean_names() |> 
+    select(departamento=departamento_hecho, municipio=municipio_hecho, year, '1'=ene, '2'=feb, '3'=mar, '4'=abr, '5'=may, '6'=jun, '7'=jul, '8'=ago, '9'=sep, '10'=oct, '11'=nov, '12'=dic, rural=rural, urban=urbana) |> 
+  pivot_longer(cols = -c(departamento, municipio, year, rural, urban),
+               names_to = "month",
+               values_to = "homicides") |> 
+   mutate(month=as.numeric(month))
+
+
+
+
+#### 2011
+crime_2011 <- read_xlsx(here("raw-data", "11_homicides.xlsx")) |> 
+    janitor::clean_names() |> 
+    select(departamento=departamento_hecho, municipio=municipio_hecho, year, '1'=ene, '2'=feb, '3'=mar, '4'=abr, '5'=may, '6'=jun, '7'=jul, '8'=ago, '9'=sep, '10'=oct, '11'=nov, '12'=dic, rural=rural, urban=urbana) |> 
+  pivot_longer(cols = -c(departamento, municipio, year, rural, urban),
+               names_to = "month",
+               values_to = "homicides") |> 
+   mutate(month=as.numeric(month))
+
+
+
+#### 2012
+crime_2012 <- read_xlsx(here("raw-data", "12_homicides.xlsx")) |> 
+    janitor::clean_names() |> 
+    select(departamento=departamento_hecho, municipio=municipio_hecho, year, '1'=ene, '2'=feb, '3'=mar, '4'=abr, '5'=may, '6'=jun, '7'=jul, '8'=ago, '9'=sep, '10'=oct, '11'=nov, '12'=dic, rural=rural, urban=urbana) |> 
+  pivot_longer(cols = -c(departamento, municipio, year, rural, urban),
+               names_to = "month",
+               values_to = "homicides") |> 
+   mutate(month=as.numeric(month))
+
+
+
+#### 2013
+crime_2013 <- read_xlsx(here("raw-data", "13_homicides.xlsx")) |> 
+    janitor::clean_names() |> 
+    select(departamento=departamento_hecho, municipio=municipio_hecho, year, '1'=ene, '2'=feb, '3'=mar, '4'=abr, '5'=may, '6'=jun, '7'=jul, '8'=ago, '9'=sep, '10'=oct, '11'=nov, '12'=dic, rural=rural, urban=urbano) |> 
+  pivot_longer(cols = -c(departamento, municipio, year, rural, urban),
+               names_to = "month",
+               values_to = "homicides") |> 
+   mutate(month=as.numeric(month))
+
+
+
+#### 2014
+crime_2014 <- read_xlsx(here("raw-data", "14_homicides.xlsx")) |> 
+    janitor::clean_names() |> 
+    select(departamento=departamento_hecho, municipio=municipio_hecho, year, '1'=ene, '2'=feb, '3'=mar, '4'=abr, '5'=may, '6'=jun, '7'=jul, '8'=ago, '9'=sep, '10'=oct, '11'=nov, '12'=dic, rural=rural, urban=urbana) |> 
+  pivot_longer(cols = -c(departamento, municipio, year, rural, urban),
+               names_to = "month",
+               values_to = "homicides") |> 
+   mutate(month=as.numeric(month))
+
+
+
+#### 2015
+crime_2015 <- read_xlsx(here("raw-data", "15_homicides.xlsx")) |> 
+    janitor::clean_names() |> 
+    select(departamento=deptartamento_hecho, municipio=municipio_hecho, year, '1'=ene, '2'=feb, '3'=mar, '4'=abr, '5'=may, '6'=jun, '7'=jul, '8'=ago, '9'=sep, '10'=oct, '11'=nov, '12'=dic, rural=rural, urban=urbano) |> 
+  pivot_longer(cols = -c(departamento, municipio, year, rural, urban),
+               names_to = "month",
+               values_to = "homicides") |> 
+   mutate(month=as.numeric(month))
+
+
+
+#### 2016
+crime_2016 <- read_xlsx(here("raw-data", "16_homicides.xlsx")) |> 
+    janitor::clean_names() |> 
+    select(departamento=departamento_hecho, municipio=municipio_hecho, year, '1'=ene, '2'=feb, '3'=mar, '4'=abr, '5'=may, '6'=jun, '7'=jul, '8'=ago, '9'=sep, '10'=oct, '11'=nov, '12'=dic, rural=rural, urban=urbano) |> 
+  pivot_longer(cols = -c(departamento, municipio, year, rural, urban),
+               names_to = "month",
+               values_to = "homicides") |> 
+   mutate(month=as.numeric(month))
+
+
+
+#### 2017
+### NOTE: DATA ONLY GOES UNTIL SEPTEMBER 2017 
+crime_2017 <- read_xlsx(here("raw-data", "17_homicides.xlsx")) |> 
+    janitor::clean_names() |> 
+    select(departamento=departamento_hecho, municipio=municipio_hecho, year, '1'=ene, '2'=feb, '3'=mar, '4'=abr, '5'=may, '6'=jun, '7'=jul, '8'=ago, '9'=sep, rural=rural, urban=urbano) |> 
+  pivot_longer(cols = -c(departamento, municipio, year, rural, urban),
+               names_to = "month",
+               values_to = "homicides") |> 
+   mutate(month=as.numeric(month))
+
+crime_list<- list(crime_2010, crime_2011, crime_2012, crime_2013, crime_2014, crime_2015, crime_2016, crime_2017, repatriados)
+
+```
+
+For Loop to make all the municipios the same 
+```#{r cars}
+  # Loop over each row and replace the value in column "y"
+for (i in seq_along(crime_list)){
+  df<-crime_list[[i]]
+  for (j in 1:nrow(df)) {
+  if (df[j, "municipio"] == "SAN LORENZO" & df[j, "departamento"] == "SAN VICENTE") {
+    df[j, "municipio"] <- "SAN LORENZO SV"  
+  }
+   if (df[j, "municipio"] == "SAN LORENZO" & df[j, "departamento"] == "AHUACHAPAN") {
+    df[j, "municipio"] <- "SAN LORENZO AH"  
+   }
+    if (df[j, "municipio"] == "SAN ISIDRO" & df[j, "departamento"] == "MORAZAN") {
+    df[j, "municipio"] <- "SAN ISIDRO MO"  
+    }
+   if (df[j, "municipio"] == "SAN ISIDRO" & df[j, "departamento"] == "CABAÑAS") {
+    df[j, "municipio"] <- "SAN ISIDRO CA"  
+   }
+  if (df[j, "municipio"] == "SAN FERNANDO" & df[j, "departamento"] == "MORAZAN") {
+    df[j, "municipio"] <- "SAN FERNANDO MO"  
+  }
+   if (df[j, "municipio"] == "SAN FERNANDO" & df[j, "departamento"] == "CHALATENANGO") {
+    df[j, "municipio"] <- "SAN FERNANDO CH"  
+   }
+  if (df[j, "municipio"] == "EL ROSARIO" & df[j, "departamento"] == "LA PAZ") {
+    df[j, "municipio"] <- "EL ROSARIO LP"  
+  }
+  if (df[j, "municipio"] == "EL ROSARIO" & df[j, "departamento"] == "MORAZAN") {
+    df[j, "municipio"] <- "EL ROSARIO M"  
+  }
+   if (df[j, "municipio"] == "EL ROSARIO" & df[j, "departamento"] == "CUSCATLAN") {
+    df[j, "municipio"] <- "EL ROSARIO CU"  
+   }
+   if (df[j, "municipio"] == "EL CARMEN" & df[j, "departamento"] == "CUSCATLAN") {
+    df[j, "municipio"] <- "EL ROSARIO CU"  
+   }
+   if (df[j, "municipio"] == "EL CARMEN" & df[j, "departamento"] == "LA UNION") {
+    df[j, "municipio"] <- "EL ROSARIO LU"  
+   }
+  if (df[j, "municipio"] == "SAN RAFAEL" & df[j, "departamento"] == "CHALATENANGO") {
+    df[j, "municipio"] <- "SAN RAFAEL DE MERCEDES"  
+  }
+  if (df[j, "municipio"] == "SANTO DOMINGO" & df[j, "departamento"] == "SAN VICENTE") {
+    df[j, "municipio"] <- "SANTO DOMINGO VI"  
+  }
+   if (df[j, "municipio"] == "SANTO DOMINGO" & df[j, "departamento"] == "SONSONATE") {
+    df[j, "municipio"] <- "SANTO DOMINGO DE GUZMAN"  
+   }
+   if (df[j, "municipio"] == "SAN RAFAEL" & df[j, "departamento"] == "LA PAZ") {
+    df[j, "municipio"] <- "SAN RAFAEL OBRAJUELO"  
+   }
+  if (df[j, "municipio"] == "SAN RAFAEL" & df[j, "departamento"] == "CUSCATLAN") {
+    df[j, "municipio"] <- "SAN RAFAEL CEDROS"  
+  }
+  if (df[j, "municipio"] == "SAN RAFAEL" & df[j, "departamento"] == "SAN MIGUEL") {
+    df[j, "municipio"] <- "SAN RAFAEL ORIENTE"  
+  }
+  }
+}
+```
+
+Merge all the cleaned DFs together
+```{r cars}
+
+# Append to the bottom of crime_2009 for compiled list
+full_homs_df<- rbind(crime_2010, crime_2011,crime_2012, crime_2013, crime_2014, crime_2015, crime_2016, crime_2017)
+
+# New fully merged crime data
+full_homs_df |> 
+  mutate_at(vars(homicides), replace_na, 0)
+
+full_homs_df<- rename(full_homs_df, "rural_homicides"=rural,
+         "urban_homicides"=urban)
+
+# Filter years for where there is BOTH homicide and repatriation data 
+
+merged<- left_join(repatriados, full_homs_df |> dplyr::select(municipio, year, month, homicides, rural_homicides, urban_homicides), by=join_by("municipio"=="municipio", "year"=="year", "month"=="month"), multiple="all") |> 
+  filter(year<=2017) |> 
+  filter(year>=2010) |> 
+   filter(!is.na(homicides)) 
+
+
+```
+
+
+# Load in the Assault Data
+```{r cars}
+#### 2010 
+assault_2010 <- read_xlsx(here("raw-data", "Assault_10.xlsx")) |> 
+    janitor::clean_names() |> 
+    select(departamento=departamento_hecho, municipio=municipio_hecho, year, '1'=ene, '2'=feb, '3'=mar, '4'=abr, '5'=may, '6'=jun, '7'=jul, '8'=ago, '9'=sep, '10'=oct, '11'=nov, '12'=dic, rural=rural, urban=urbana) |> 
+  pivot_longer(cols = -c(departamento, municipio, year, rural, urban),
+               names_to = "month",
+               values_to = "assaults") |> 
+   mutate(month=as.numeric(month))
+
+
+
+
+#### 2011
+assault_2011 <- read_xlsx(here("raw-data", "Assault_11.xlsx")) |> 
+    janitor::clean_names() |> 
+    select(departamento=departamento_hecho, municipio=municipio_hecho, year, '1'=ene, '2'=feb, '3'=mar, '4'=abr, '5'=may, '6'=jun, '7'=jul, '8'=ago, '9'=sep, '10'=oct, '11'=nov, '12'=dic, rural=rural, urban=urbana) |> 
+  pivot_longer(cols = -c(departamento, municipio, year, rural, urban),
+               names_to = "month",
+               values_to = "assaults") |> 
+   mutate(month=as.numeric(month))
+
+
+
+#### 2012
+assault_2012 <- read_xlsx(here("raw-data", "Assault_12.xlsx")) |> 
+    janitor::clean_names() |> 
+    select(departamento=departamento_hecho, municipio=municipio_hecho, year, '1'=ene, '2'=feb, '3'=mar, '4'=abr, '5'=may, '6'=jun, '7'=jul, '8'=ago, '9'=sep, '10'=oct, '11'=nov, '12'=dic, rural=rural, urban=urbana) |> 
+  pivot_longer(cols = -c(departamento, municipio, year, rural, urban),
+               names_to = "month",
+               values_to = "assaults") |> 
+   mutate(month=as.numeric(month))
+
+
+
+#### 2013
+assault_2013 <- read_xlsx(here("raw-data", "Assault_13.xlsx")) |> 
+    janitor::clean_names() |> 
+    select(departamento=departamento_hecho, municipio=municipio_hecho, year, '1'=ene, '2'=feb, '3'=mar, '4'=abr, '5'=may, '6'=jun, '7'=jul, '8'=ago, '9'=sep, '10'=oct, '11'=nov, '12'=dic, rural=rural, urban=urbana) |> 
+  pivot_longer(cols = -c(departamento, municipio, year, rural, urban),
+               names_to = "month",
+               values_to = "assaults") |> 
+   mutate(month=as.numeric(month))
+
+
+
+#### 2014
+assault_2014 <- read_xlsx(here("raw-data", "Assault_14.xlsx")) |> 
+    janitor::clean_names() |> 
+    select(departamento=departamento_hecho, municipio=municipio_hecho, year, '1'=ene, '2'=feb, '3'=mar, '4'=abr, '5'=may, '6'=jun, '7'=jul, '8'=ago, '9'=sep, '10'=oct, '11'=nov, '12'=dic, rural=rural, urban=urbana) |> 
+  pivot_longer(cols = -c(departamento, municipio, year, rural, urban),
+               names_to = "month",
+               values_to = "assaults") |> 
+   mutate(month=as.numeric(month))
+
+
+
+#### 2015
+assault_2015 <- read_xlsx(here("raw-data", "Assault_15.xlsx")) |> 
+    janitor::clean_names() |> 
+    select(departamento=departamento_hecho, municipio=municipio_hecho, year, '1'=ene, '2'=feb, '3'=mar, '4'=abr, '5'=may, '6'=jun, '7'=jul, '8'=ago, '9'=sep, '10'=oct, '11'=nov, '12'=dic, rural=rural, urban=urbana) |> 
+  pivot_longer(cols = -c(departamento, municipio, year, rural, urban),
+               names_to = "month",
+               values_to = "assaults") |> 
+   mutate(month=as.numeric(month))
+
+
+
+#### 2016
+assault_2016 <- read_xlsx(here("raw-data", "Assault_16.xlsx")) |> 
+    janitor::clean_names() |> 
+    select(departamento=departamento_hecho, municipio=municipio_hecho, year, '1'=ene, '2'=feb, '3'=mar, '4'=abr, '5'=may, '6'=jun, '7'=jul, '8'=ago, '9'=sep, '10'=oct, '11'=nov, '12'=dic, rural=rural, urban=urbana) |> 
+  pivot_longer(cols = -c(departamento, municipio, year, rural, urban),
+               names_to = "month",
+               values_to = "assaults") |> 
+   mutate(month=as.numeric(month))
+
+
+
+#### 2017
+### NOTE: DATA ONLY GOES UNTIL SEPTEMBER 2017 
+assault_2017 <- read_xlsx(here("raw-data", "Assault_17.xlsx")) |> 
+    janitor::clean_names() |> 
+    select(departamento=departamento_hecho, municipio=municipio_hecho, year, '1'=ene, '2'=feb, '3'=mar, '4'=abr, '5'=may, '6'=jun, '7'=jul, '8'=ago, '9'=sep, rural=rural, urban=urbana) |> 
+  pivot_longer(cols = -c(departamento, municipio, year, rural, urban),
+               names_to = "month",
+               values_to = "assaults") |> 
+   mutate(month=as.numeric(month))
+
+
+# Append to the bottom of crime_2009 for compiled list
+full_ass_df<- rbind(assault_2010, assault_2011, assault_2012, assault_2013, assault_2014, assault_2015, assault_2016, assault_2017)|> 
+    mutate_at(vars(assaults),  replace_na, 0) |> 
+  filter(!is.na(assaults))
+
+full_ass_df<- rename(full_ass_df,"rural_assaults"= rural,
+         "urban_assaults"=urban)
+
+
+# Filter years for where there is BOTH assault and repatriation data 
+
+merged<- left_join(merged, full_ass_df |> dplyr::select(municipio, year, month, assaults, rural_assaults, urban_assaults), by=join_by("municipio"=="municipio", "year"=="year", "month"=="month"), multiple="all") |> 
+  filter(year<=2017) |> 
+  filter(year>=2010) |> 
+  filter(!is.na(assaults))
+
+# Merge the Crime/Assault Data with the Economic Data
+merged<- left_join(merged, my_data |> dplyr::select(mun_id, year, month_hh_income, income_pcap), by=join_by("munid"=="mun_id", "year"=="year"), multiple="all") |> 
+  filter(year<=2017) |> 
+  filter(year>=2010) |> 
+  filter(!is.na(assaults))
+
+write_csv(merged, file="merged2.csv", col_names=FALSE)
+
+# Get the average homicides and assaults per year so we can make en exploratory graph
+homicides <- merged %>% 
+  group_by(year) %>% 
+  summarize(homicides = sum(homicides),
+            repatriados=sum(repatriados),
+            assaults=sum(assaults))
+
+homicides$homicides_change <- NA
+for (i in 2:nrow(homicides)) {
+  homicides$homicides_change[i] <- homicides$homicides[i] - homicides$homicides[i-1]
+}
+homicides$repatriados_change <- NA
+for (i in 2:nrow(homicides)) {
+  homicides$repatriados_change[i] <- homicides$repatriados[i] - homicides$repatriados[i-1]
+}
+homicides$assaults_change <- NA
+for (i in 2:nrow(homicides)) {
+  homicides$assaults_change[i] <- homicides$assaults[i] - homicides$assaults[i-1]
+}
+
+
+```
+
+# Preliminary Scatterplots
+
+```{r pressure, echo=FALSE}
+library(car)
+scatterplot(homicides~ year, boxplots=FALSE, smooth=TRUE, reg.line=FALSE, data=merged)
+scatterplot(assaults~year, boxplots=FALSE, smooth=TRUE, reg.line=FALSE, data=merged)
+library(foreign)
+#install.packages("gplots")
+library(gplots)
+plotmeans(homicides ~ year, main="Heterogeineity across municipalites", data=homicides)
+plotmeans(assaults ~ year, main="Heterogeineity across municipalites", data=homicides)
+plotmeans(repatriados ~ year, main="Heterogeineity across municipalites", data=homicides)
+```
+
+
+Conintued Graphical Exploration
+
+```{r pressure, echo=FALSE}
+
+# Normal Distribution?
+# histogram, Q-Q plot, and boxplot
+par(mfrow = c(1, 3))
+hist(merged$homicides, main = "Histogram")
+boxplot(merged$homicides, main = "Boxplot")
+qqnorm(merged$homicides, main = "Normal Q-Q plot")
+
+# histogram, Q-Q plot, and boxplot
+par(mfrow = c(1, 3))
+hist(merged$assaults, main = "Histogram")
+boxplot(merged$assaults, main = "Boxplot")
+qqnorm(merged$assaults, main = "Normal Q-Q plot")
+
+
+
+# Basic Plots of Repatriados, Homs, Assaults
+
+homicides.graph<- ggplot(data=homicides, aes(x=year)) +
+                        geom_line(aes(y = repatriados, color="red"))+
+                        geom_line(aes(y = homicides, color="blue")) + 
+                        geom_line(aes(y = assaults, color="green"))+ 
+  scale_color_discrete(labels = c("Homicides", "Assaults", "Repatriations"))+
+  labs(x = "Year", y = "# of Individuals", title = "Repatriations, Homicides, and Assaults in El Salvador") +
+  theme(legend.position = "bottom", legend.text = element_text(size = 12))
+homicides.graph
+pdf("homicides.graph.pdf", width = 3, height = 6) # width and height are in inches
+print(homicides.graph)
+dev.off()
+
+
+#Changes in Assaults All Variables together
+changes.graph<-ggplot(data=homicides, aes(x=year)) +
+                        geom_line(aes(y = repatriados_change, color="red"))+
+                        geom_line(aes(y = homicides_change, color="blue")) + 
+                        geom_line(aes(y = assaults_change, color="green")) +
+scale_color_discrete(labels = c("Homicides", "Assaults", "Repatriations"))+
+  labs(x = "Year", y = "# of Individuals", title = "Repatriations, Homicides, and Assaults in El Salvador") +
+  theme(legend.position = "bottom", legend.text = element_text(size = 12))
+changes.graph
+
+
+
+# This is our motivating factor for repatriados ~ homicides
+repatriados.graph<-ggplot(homicides, aes(x=repatriados_change))+
+                            geom_line(aes(y=homicides_change))
+repatriados.graph
+
+# Basic Plots of Assaults and Repatriados
+assault.graph<-ggplot(homicides, aes(x=year, y=assaults))+
+                     geom_point()+
+  geom_smooth(method = "lm", se = FALSE, color = "red")
+assault.graph
+
+# This is our motivating factor for repatriados assaults
+repatriados_assaults.graph<-ggplot(homicides, aes(x=repatriados, y=assaults))+
+  geom_point()  +  
+  geom_smooth(method = "lm", se = FALSE, color = "red")
+            
+repatriados_assaults.graph
+```
+
+
+
+```{r pressure, echo=FALSE}
+#Regression Equation of homicides
+repatriados.homicides.lm <- lm(homicides ~ repatriados, data = merged)
+
+summary(repatriados.homicides.lm)
+yhat <- ols$fitted
+
+
+plot(repatriados.homicides.lm)
+
+# Adding Regression Line
+#repatriados.graph <- repatriados.graph + geom_smooth(method="lm", col="red")
+
+#repatriados.graph
+
+
+# Fixed Effects Regression controlling for year and municipality
+repatriados.homicides.lm <- lm(homicides ~ repatriados + year - 1, data = merged)
+
+summary(repatriados.homicides.lm)
+
+
+```
+
+
+Lets check out Criminales
+
+```{r pressure, echo=FALSE}
+# Basic Plots of Deported Criminals effects on homicides
+criminales.graph <- ggplot(merged, aes(x=criminal, y= homicides))+
+  geom_point()
+
+criminales.graph
+
+# Regression Equation of Criminals on Homicides
+repatriados.criminales.lm <- lm(homicides ~ criminal, data = merged)
+
+summary(repatriados.criminales.lm)
+plot(repatriados.criminales.lm)
+
+
+
+```
+
+
+# Hausman Test
+
+```{r pressure, echo=FALSE}
+# Run each model and perform a Hausman test to see if FE or RE is a better fit
+
+fixed <- plm(homicides~repatriados, data=merged, index=c("municipio", "year","month"), model="within")
+random <- plm(homicides~repatriados, data=merged, index=c("municipio", "year","month"), model="random")
+
+phtest(fixed,random) #Hausman test - if less than .05 use fixed effects - p = 2.2 e-16
+summary(fixed)
+
+
+
+```
+
+# Comparing Models for Homicides 
+```{r mtcars, results='asis'}
+library(stargazer)
+
+
+# Convert your data to pdata.frame format -- PANEL DATA FRAME
+panel <- pdata.frame(merged, index = c("munid", "year", "month"))
+
+# Check that your pdata.frame was created correctly
+summary(panel)
+
+table(index(panel), useNA = "ifany")
+
+# CHeck for duplicated in municipalities or departments
+dupes <- panel[duplicated(paste(panel$munid, panel$year, panel$month)), ]
+
+print(dupes)
+
+# get mean and Standard deviation
+one<- mean(panel$homicides)
+two<- mean(panel$repatriados)
+three<- mean(panel$assaults)
+std_1= sd(panel$homicides)
+std_2= sd(panel$repatriados)
+std_3= sd(panel$assaults)
+
+# get threshold values for outliers
+#Tmin = mean-(3*std)
+#Tmax = mean+(3*std)
+
+# find outlier
+#panel$homicides[which(panel$homicides < Tmin | panel$homicides > Tmax)]
+#panel$homicides[which(panel$homicides > Tmin &  panel$homicides < Tmax)]
+
+# Run your fixed effects regression model and store the results
+#1. OLS 
+ols <-lm(homicides ~ repatriados +month_hh_income, data=panel) 
+summary(ols) 
+
+#1a. OLS Assaults
+ols_assault <- lm(assaults ~ repatriados + month_hh_income, data=panel)
+summary(ols_assault)
+
+
+#2. FE Model 1 - municipality and control for hh income level fixed effects
+fe_model_1 <- plm(homicides ~ repatriados + month_hh_income, data = panel,
+             index = c("munid"),
+             model = "within", effect="twoways")
+summary(fe_model_1)
+
+#2a. FE Model 1a - munipalilty and year FE
+fe_model_2 <- plm(homicides ~ repatriados + month_hh_income, data = panel,
+             index = c("munid", "year"),
+             model = "within", effect="twoways")
+summary(fe_model_2)
+
+#3. FE Model 2 - assaults with FE for municipality
+fe_model_3 <- plm(assaults ~ repatriados+ month_hh_income, data = panel,
+             index = c("munid"),
+             model = "within",
+             effect = "twoways")
+summary(fe_model_3)
+
+#2. Model 3 - assaults with FE for municipality and year
+fe_model_4 <- plm(assaults ~ repatriados + month_hh_income, data = panel,
+             index = c("munid", "year"),
+             model = "within",
+             effect = "twoways")
+summary(fe_model_4)
+
+### Adding Lags to account for the time that needs to elapse before assaults or murders are made
+
+#3. Model 4 - homicides with lags 
+model_4_w_lags <- plm(homicides ~ lag(repatriados, 1) + month_hh_income, data = panel,
+             index = c("munid", "year"),
+             model = "within",
+             effect = "twoways")
+summary(model_4_w_lags)
+
+#4. Model 5 - assaults with lags 
+model_5_w_lags <- plm(assaults ~ lag(repatriados, 1) + month_hh_income, data = panel,
+             index = c("munid", "year"),
+             model = "within",
+             effect = "twoways")
+summary(model_5_w_lags)
+
+#3. Model 4 - homicides with lags 
+model_6_w_lags <- plm(homicides ~ lag(repatriados, 2) + month_hh_income, data = panel,
+             index = c("munid", "year"),
+             model = "within",
+             effect = "twoways")
+summary(model_6_w_lags)
+
+#4. Model 5 - assaults with lags 
+model_7_w_lags <- plm(assaults ~ lag(repatriados, 2) + month_hh_income, data = panel,
+             index = c("munid", "year"),
+             model = "within",
+             effect = "twoways")
+summary(model_7_w_lags)
+
+text_output<- stargazer(ols, ols_assault,
+          type="html",
+          title = "Table 1: Results of OLS Models Estimating the Effect of Repatriations on Homicides per Month and Assaults per Month",
+          column.labels = c("Homicides per Month", "Assaults per Month"),
+          dep.var.caption = "Dependent Variables: Crime",
+          align=TRUE, 
+          digits=2, 
+          out="ols.html",
+          header=FALSE)
+
+text_output_2 <- stargazer(fe_model_1, fe_model_2, fe_model_3, fe_model_4,
+          type="html", 
+          title = "Table 2: Results for Model II Estimating the Effect of Repatriations on Homicides per Month and Assaults per Month Using Munipality and Year Fixed-Effects",
+          column.labels = c("Homicides per Month", "Homicides per Month", "Assaults per Month", "Assaults per Month"),
+          dep.var.caption = "Dependent Variables: Crime",
+          align=TRUE, 
+          digits=2, 
+          out="fe.html",
+          header=FALSE)
+
+
+text_output_3 <- stargazer(model_4_w_lags, model_5_w_lags,model_6_w_lags, model_7_w_lags,
+          type="html", 
+          title = "Table 3: Results for Model II Estimating the Effect of Repatriations on Homicides per Month and Assaults per Month Using Munipality and Year Fixed-Effects and a 1 Month Lag",
+          column.labels = c("Homicides per Month", "Assaults per Month","Homicides per Month", "Assaults per Month"),
+          dep.var.caption = "Dependent Variables: Crime",
+          align=TRUE, 
+          digits=2, 
+          out="lags.html",
+          header=FALSE)
+
+
+
+```
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
